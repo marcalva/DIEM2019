@@ -12,6 +12,7 @@ library(ggExtra)
 library(RColorBrewer)
 library(viridis)
 library(reshape2)
+source("scripts/common/standard_seurat.R")
 source("scripts/common/plotting.R")
 source("scripts/common/overlap_graph.R")
 

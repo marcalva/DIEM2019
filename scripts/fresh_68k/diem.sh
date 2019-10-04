@@ -1,16 +1,15 @@
 #!/bin/bash
 #$ -cwd
 #$ -j y
-#$ -pe shared 4
-#$ -l h_data=4000M,h_rt=2:00:00,highp
+#$ -pe shared 8
+#$ -l h_data=4000M,h_rt=10:00:00,highp
 #$ -v QQAPP=openmp
 #$ -M malvarez@mail
 #  Notify at beginning and end of job
 #$ -m n
 #$ -r n
-#$ -t 1-6
 #$ -V
-#$ -o emptydrops.sh.log.$TASK_ID
+#$ -o diem.sh.log
 
 export OMP_NUM_THREADS=4
 
@@ -32,5 +31,5 @@ export CPATH=$CPATH:/u/project/pajukant/malvarez/include/
 export LIBRARY_PATH=$LIBRARY_PATH:/u/project/pajukant/malvarez/lib/
 export PYTHONPATH=/u/project/pajukant/malvarez/.local/lib/python3.6/site-packages/:${PYTHONPATH}
 
-Rscript emptydrops.R $SGE_TASK_ID
+Rscript diem.R
 

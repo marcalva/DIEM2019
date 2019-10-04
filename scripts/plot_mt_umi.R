@@ -41,6 +41,9 @@ dp <- paste0("data/processed/", labl, "/")
 dir_plot <- paste0("results/", labl, "/plots/")
 
 sce_ad <- readRDS("data/processed/adpcyte/diem/adpcyte.diem_sce.rds") # To get the barcode-rank plot
+mt_genes <- grep(pattern="^mt-", x=rownames(sce_ad@gene_data), ignore.case=TRUE, value=TRUE)
+sce_ad <- get_gene_pct(x = sce_ad, genes = mt_genes, name = "pct.mt")
+
 
 seur_ad <- readRDS("data/processed/adpcyte/quantile/adpcyte.seur_obj.rds")
 markers_ad <- read.table("results/adpcyte/quantile/adpcyte.seur_markers.txt", header=TRUE, stringsAsFactors=FALSE, check.names=FALSE)
@@ -58,6 +61,8 @@ dp <- paste0("data/processed/", labl, "/")
 dir_plot <- paste0("results/", labl, "/plots/")
 
 sce_mb <- readRDS("data/processed/mouse_nuclei_2k/diem/mouse_nuclei_2k.diem_sce.rds")
+mt_genes <- grep(pattern="^mt-", x=rownames(sce_mb@gene_data), ignore.case=TRUE, value=TRUE)
+sce_mb <- get_gene_pct(x = sce_mb, genes = mt_genes, name = "pct.mt")
 
 seur_mb <- readRDS("data/processed/mouse_nuclei_2k/quantile/mouse_nuclei_2k.seur_obj.rds")
 markers_mb <- read.table("results/mouse_nuclei_2k/quantile/mouse_nuclei_2k.seur_markers.txt",
@@ -78,6 +83,12 @@ dir_plot <- paste0("results/", labl, "/plots/")
 
 scel_at <- lapply(lab_ids, function(id) readRDS(paste0("data/processed/atsn/diem/", id, ".diem_sce.rds")) )
 names(scel_at) <- lab_ids
+scel_at <- lapply(scel_at, function(sce){
+                  mt_genes <- grep(pattern="^mt-", x=rownames(sce@gene_data), ignore.case=TRUE, value=TRUE)
+                  sce <- get_gene_pct(x = sce, genes = mt_genes, name = "pct.mt")
+                  return(sce)
+                      })
+
 seur_at <- readRDS("data/processed/atsn/diem/atsn.seur_obj.rds")
 markers_at <- read.table("results/atsn/quantile/atsn.seur_markers.txt",
 					  header=TRUE, stringsAsFactors=FALSE, check.names=FALSE)

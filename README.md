@@ -75,6 +75,15 @@ Rscript quantile.debris.seurat.R
 cd ../../
 ```
 
+For the PBMC single-cell data
+```bashrc
+cd scripts/fresh_68k/
+qsub -sync y diem.sh
+qsub -sync y emptydrops.sh
+qsub -sync y quantile.sh
+cd ../../
+```
+
 Analysis and figures
 ```bashrc
 cd scripts
@@ -91,5 +100,24 @@ Rscript plot_umap_mt.R # Figure 5
 Rscript diffpa_malat1.R # Figure S5
 Rscript plot_fresh_68k.R # Figure 6
 Rscript mt_boxplot.R # Supp Figure S7
+```
+
+## Run everything at once
+
+You can run all the analyses with the following script.
+This requires qsub and you may have to change the headers. 
+
+For the `run_all.sh` script, you will have to change or comment out 
+the bash variable assignments since they are specific to my system 
+and will cause your run to fail.
+
+```bash
+./run_all.sh
+```
+
+or better yet
+
+```bash
+qsub run_all.sh
 ```
 
