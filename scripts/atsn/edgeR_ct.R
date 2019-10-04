@@ -10,16 +10,15 @@ library(Matrix)
 labl <- "atsn"
 method <- "DE"
 
-paths <- c("~/sn_rnaseq2018/data/processed/TwinFatSN/110686_121444/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/",
-           "~/sn_rnaseq2018/data/processed/TwinFatSN/54172_58356/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/",
-           "~/sn_rnaseq2018/data/processed/TwinFatSN/57289_64605/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/",
-           "~/sn_rnaseq2018/data/processed/TwinFatSN/62630_75306/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/",
-           "~/sn_rnaseq2018/data/processed/TwinFatSN/63099_76245/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/",
-           "~/sn_rnaseq2018/data/processed/TwinFatSN/63099_76246/GRCh38_primary_assembly_pli_premrna_genome/outs/raw_gene_bc_matrices/GRCh38.primary_assembly.pli.premrna.genome/")
-snames <- c("110686_121444", "54172_58356", "57289_64605", "62630_75306", "63099_76245", "63099_76246")
+paths <- c("data/raw/AT1/",
+           "data/raw/AT2/",
+           "data/raw/AT3/",
+           "data/raw/AT4/",
+           "data/raw/AT5/",
+           "data/raw/AT6/")
+
 lab_ids <- c("AT1", "AT2", "AT3", "AT4", "AT5", "AT6")
 names(paths) <- lab_ids
-
 
 seur <- readRDS("data/processed/atsn/quantile/atsn.seur_obj.rds")
 
