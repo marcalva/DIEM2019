@@ -23,6 +23,51 @@ samples were placed in `AT1` through `AT6`. Each of these
 directories should have the files `barcodes.tsv`, `genes.tsv`, 
 and `matrix.mtx`.
 
+## Spliced reads fractions
+
+I ran velocyto on the DiffPA and adipose tissue, and copied the results in. 
+The script `process_sf.R` processes the raw data copied over into an 
+analysis-ready table.
+
+I ran velocyto on the mouse brain data here. The veloctyo results from this 
+are processed with `process_sf.R`.
+
+```bashrc
+cd scripts/mouse_nuclei_2k
+Rscript get_top_ids.R
+qsub -sync y run10x.sh
+python3.6 get_splice_frctn.py
+cd ../
+
+Rscript process_sf.R
+cd ../
+```
+
+## Testing parameters
+
+I tested different k_init values with these scripts
+
+```bashrc
+cd scripts/atsn
+qsub -sync y diem.k_init.t0.sh
+qsub -sync y diem.k_init.sh
+cd ../../
+```
+
+I tested filtering values with these scripts:
+
+```bashrc
+cd scripts/adpcyte
+qsub -sync y diem.filt.sh
+cd ../
+cd mouse_nuclei_2k
+qsub -sync y diem.filt.sh
+cd ../
+cd atsn
+qsub -sync y diem.filt.sh
+cd ../../
+```
+
 ## Run filtering methods
 
 Run each of the three filtering for the three methods.
@@ -54,6 +99,10 @@ qsub -sync y emptydrops.sh
 Rscript emptydrops.seurat.R
 ./quantile.sh
 Rscript quantile.seurat.R
+
+# Integrated:
+qsub -sync y diem.integrated.fltr.1.R
+qsub -sync y diem.integrated.sh
 cd ../../
 ```
 
@@ -86,20 +135,33 @@ cd ../../
 
 Analysis and figures
 ```bashrc
-cd scripts
-Rscript plot_quant.fig1.R # Figure 1
-Rscript plot_mt_umi.R # Figure S1
+cd scripts/atsn
+Rscript plot.k_init.t0 # Figure S3
+cd ../../
+
+cd scripts/
+Rscript plot_sf_relat.R # Figure S1
+Rscript plot_quant.fig1.R # Figure 1 and S2
 Rscript plot_de_ct.R # Figure 2
-Rscript plot_cor_log2fc.R # Figure S2
-Rscript plot_overview.R # Figure 3A
+Rscript plot_cor_log2fc.R # Figure S3
 Rscript plot_umi_ngene.call.R # Fig 3B
-Rscript plot_overlap_clusters.R # Figure 4 and Supp Figure S6
-Rscript plot_removed.R # Supp Figure S3
-Rscript plot_diem_clusters.R # Supp Figure S4
+cd atsn
+    Rscript diem.seurat.k_init.t0.R # Figure S4c,d
+cd ../
+Rscript plot_params.R # Figure S5
+Rscript plot_diem_clusters.R # Figure S6
+Rscript plot_removed.R # Figure S7
+Rscript plot_overlap_clusters.R # Figure S8 S10
+Rscript diffpa_malat1.R # Figure S9
+Rscript plot_subtype.R # Figure S11
+Rscript mt_boxplot.R # Figure S12
+Rscript plot_umap_intg.R # Figure S13
+Rscript plot_init_filter_umi.R # Figure S4
+
+Rscript plot_umap_sf.R # Figure 4a,b
+Rscript overlap_droplets.R # Figure 4c
 Rscript plot_umap_mt.R # Figure 5
-Rscript diffpa_malat1.R # Figure S5
 Rscript plot_fresh_68k.R # Figure 6
-Rscript mt_boxplot.R # Supp Figure S7
 ```
 
 ## Run everything at once
