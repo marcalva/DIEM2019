@@ -36,5 +36,16 @@ keep <- sizes >= 30
 countsl <- countsl[keep]
 lab_ids <- lab_ids[keep]
 
-seurat_pipe_list(countsl, dir_label=label, project.l=lab_ids, project_out=label, method=method, scale.factor=1e3)
+seurat_pipe_list(countsl, dir_label=label, project.l=lab_ids, project=label, method=method, scale.factor=1e3)
+
+# Add percent of reads spliced
+ifn <- "data/raw/splice_frctn/all.splice_fraction.txt"
+sf <- read.table(ifn, header = TRUE, row.names = 1)
+
+seur <- readRDS(paste0(dp, label, ".seur_obj.rds"))
+
+seur$SpliceFrctn <- 100 * sf[colnames(seur),1]
+
+saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
+
 

@@ -54,6 +54,12 @@ diem_pipe <- function(counts,
     dev.off()
     system(paste("convert", "-density", "200", pdfname, jpgname))
 
+    pdfname <- paste0(dir_plot, project, ".dist.pdf")
+    jpgname <- paste0(dir_plot, label, ".dist.jpeg")
+    pdf(pdfname, width=9,height=9)
+    plot_dist(sce)
+    dev.off()
+    system(paste("convert", "-density", "200", pdfname, jpgname))
 
 	return(sce)
 }

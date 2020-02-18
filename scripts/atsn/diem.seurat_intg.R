@@ -1,4 +1,6 @@
 
+# Integrate DIEM samples using Seurat v3 instead of raw merge
+
 setwd("../../")
 
 library(diem)
@@ -45,11 +47,19 @@ keep <- sizes >= 30
 countsl <- countsl[keep]
 lab_ids <- lab_ids[keep]
 
-seurat_pipe_list(countsl, 
-                 dir_label=label, 
-                 project.l=lab_ids, 
-                 meta.data.l = mdl, 
-                 project=label, 
-                 method=method, 
-                 scale.factor=1e3)
+seur.list <- lapply(1:length(countsl), function(i) {
+                    CreateSeuratObject(countsl[[i]], 
+                                       project = lab_ids[[i]], 
+                                       min.features=200, 
+                                       meta.data=mdl[[i]])
+    })
+
+seur.list <- lapply(seur.list, seurat_norm, scale.factor=1e3)
+anchors <- FindIntegrationAnchors(object.list = seur.list, dims = 1:30)
+integrated <- IntegrateData(anchorset = anchors, dims = 1:30)
+integrated <- seurat_cluster(integrated)
+
+saveRDS(integrated, paste0(dp, "atsn.seur_intg.seur_obj.rds"))
+
+
 

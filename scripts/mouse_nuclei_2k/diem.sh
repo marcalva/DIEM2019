@@ -2,15 +2,14 @@
 #$ -cwd
 #$ -j y
 #$ -pe shared 4
-#$ -l h_data=4000M,h_rt=2:00:00,highp
+#$ -l h_data=4000M,h_rt=3:00:00,highp
 #$ -v QQAPP=openmp
 #$ -M malvarez@mail
 #  Notify at beginning and end of job
 #$ -m n
 #$ -r n
-#$ -t 1-6
 #$ -V
-#$ -o diem.sh.log.$TASK_ID
+#$ -o diem.sh.log
 
 . /u/local/Modules/default/init/modules.sh
 module load R/3.5.1

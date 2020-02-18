@@ -2,6 +2,7 @@
 setwd("../")
 
 library(diem)
+library(Seurat)
 suppressMessages(library(DropletUtils))
 library(ggplot2)
 library(gplots)
@@ -42,15 +43,17 @@ get_nuc_linc <- function(seur, patterns=lincs, colname="percent.linc"){
 
 boxplot_ft_fct <- function(x, names, ct_col="RNA_snn_res.0.8", 
 						   colname="percent.mt", ylab="MT%", 
-						   color_breaks=waiver(), 
+						   color_breaks=waiver(), scales = "free_x", ncol = 1,
 						   size=1){
 	dfl <- lapply(1:length(x), function(i) data.frame(Mito=x[[i]]@meta.data[,colname], Cluster=x[[i]]@meta.data[,ct_col], Method=names[[i]]))
 	df <- do.call(rbind, dfl)
 	df <- reshape2::melt(df)
+    names <- factor(names)
+    df[,"Method"] <- factor(df[,"Method"], levels = levels(names))
 
 	p <- ggplot(df, aes(x=Cluster, y=value)) +
 	geom_boxplot(outlier.shape = NA) + theme_bw() + 
-	facet_wrap(~Method, scales="free_x") + 
+	facet_wrap(~Method, scales=scales, ncol = ncol) + 
 	ylab(ylab) + 
 	theme(legend.position="none", 
 		  text=element_text(size=16),
@@ -61,7 +64,7 @@ boxplot_ft_fct <- function(x, names, ct_col="RNA_snn_res.0.8",
 
 plot_umap_fct <- function(x, names, colname="percent.mt", legend_name="MT%", 
 						  color_limits=NULL, color_breaks=waiver(),
-						  size=1){
+						  size=1, scales = "free"){
 	dfl <- lapply(1:length(x), function(i) {
                   data.frame("Mito"=x[[i]]@meta.data[,colname], 
                              "UMAP1"=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_1"], 
@@ -71,7 +74,7 @@ plot_umap_fct <- function(x, names, colname="percent.mt", legend_name="MT%",
 
 	p <- ggplot(df, aes(x=UMAP1, y=UMAP2, color=Mito)) + 
 	geom_point(size=size) + theme_bw() + 
-	facet_wrap(~Method, ncol=3, scale="free") + 
+	facet_wrap(~Method, ncol=3, scale=scales) + 
 	theme(text=element_text(size=16), 
 		  axis.text=element_blank(), 
 		  axis.ticks=element_blank(), 
@@ -121,31 +124,68 @@ seur_ED_at.debris <- readRDS("data/processed/atsn/emptydrops_debris/atsn.seur_ob
 methd_names <- c("Removed", "Passing")
 
 pu1 <- plot_umap_labels(seur_diem_at.debris) + 
-ggtitle(paste0("DIEM removed (n=", as.character(ncol(seur_diem_at.debris)), ")")) + 
+ggtitle(paste0("DIEM removed\n(n=", as.character(ncol(seur_diem_at.debris)), ")")) + 
 theme(legend.position="none", text=element_text(size=18), plot.title=element_text(hjust=0.5))
 
 pu2 <- plot_umap_labels(seur_ED_at.debris) + 
-ggtitle(paste0("EmptyDrops removed (n=", as.character(ncol(seur_ED_at.debris)), ")")) + 
+ggtitle(paste0("EmptyDrops removed\n(n=", as.character(ncol(seur_ED_at.debris)), ")")) + 
 theme(legend.position="none", text=element_text(size=18), plot.title=element_text(hjust=0.5))
 
 pu3 <- plot_umap_labels(seur_quant_at.debris) + 
-ggtitle(paste0("Quantile removed (n=", as.character(ncol(seur_quant_at.debris)), ")")) + 
+ggtitle(paste0("Quantile removed\n(n=", as.character(ncol(seur_quant_at.debris)), ")")) + 
 theme(legend.position="none", text=element_text(size=18), plot.title=element_text(hjust=0.5))
 
 
-pa1 <- boxplot_ft_fct(list(seur_diem_at.debris, seur_diem_at.clean), methd_names) + ylim(0,10) + ggtitle("DIEM")
-pa2 <- boxplot_ft_fct(list(seur_ED_at.debris, seur_ED_at.clean), methd_names) + ylim(0,10) + ggtitle("EmptyDrops")
-pa3 <- boxplot_ft_fct(list(seur_quant_at.debris, seur_quant_at.clean), methd_names) + ylim(0,10) + ggtitle("Quantile")
+pa1 <- boxplot_ft_fct(list(seur_diem_at.debris), methd_names, 
+                      colname="SpliceFrctn", ylab = "% reads\nspliced") + ggtitle("DIEM")
+pa2 <- boxplot_ft_fct(list(seur_ED_at.debris), methd_names, 
+                      colname="SpliceFrctn", ylab = "% reads\nspliced") + ggtitle("EmptyDrops")
+pa3 <- boxplot_ft_fct(list(seur_quant_at.debris), methd_names, 
+                      colname="SpliceFrctn", ylab = "% reads\nspliced") + ggtitle("Quantile")
+
+methd_names <- c("DIEM", "EmptyDrops", "Quantile")
+methd_names <- factor(methd_names, levels = methd_names)
+sl <- list("DIEM" = seur_diem_at.debris, "EmptyDrops" = seur_ED_at.debris, "Quantile" = seur_quant_at.debris)
+pbox <- boxplot_ft_fct(sl, methd_names, scales = "free_x",  
+                       colname="SpliceFrctn", ylab = "% reads\nspliced")
+
+
+g <- "PLIN1"
+pg1 <- plot_umap_gene(seur_diem_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(DIEM removed)")) + ct
+pg2 <- plot_umap_gene(seur_ED_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(EmptyDrops removed)")) + ct
+pg3 <- plot_umap_gene(seur_quant_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(Quantile removed)")) + ct
+
+g <- "RBPJ"
+pj1 <- plot_umap_gene(seur_diem_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(DIEM removed)")) + ct
+pj2 <- plot_umap_gene(seur_ED_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(EmptyDrops removed)")) + ct
+pj3 <- plot_umap_gene(seur_quant_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(Quantile removed)")) + ct
+
+
+g <- "VWF"
+pk1 <- plot_umap_gene(seur_diem_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(DIEM removed)")) + ct
+pk2 <- plot_umap_gene(seur_ED_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(EmptyDrops removed)")) + ct
+pk3 <- plot_umap_gene(seur_quant_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(Quantile removed)")) + ct
+
+g <- "CFD"
+pl1 <- plot_umap_gene(seur_diem_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(DIEM removed)")) + ct
+pl2 <- plot_umap_gene(seur_ED_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(EmptyDrops removed)")) + ct
+pl3 <- plot_umap_gene(seur_quant_at.debris, g, size = 1) + ggtitle(paste0(g, " expression\n(Quantile removed)")) + ct
+
 
 # Arrange into plot
+fl <- list(size = 20, face="bold")
 dir_plot <- paste0("results/plots/"); dir.create(dir_plot, showWarnings=FALSE, recursive=TRUE)
 pdfname <- paste0(dir_plot, "removed.pdf")
 jpgname <- paste0(dir_plot, "removed.jpeg")
-pdf(pdfname, width=18, height=10)
-ggarrange(pu1, pa1, pu2,  pa2, pu3,  pa3, nrow=3, 
-          ncol=2, labels=c("a", "", "b", "", "c", ""), 
-          font.label = list(size = 20, face="bold"), 
-          widths=c(1,1.5))
+pdf(pdfname, width=20, height=10)
+ggarrange(ggarrange(pu1, pu2, pu3, ncol = 1), 
+          ggarrange(pg1, pg2, pg3, ncol = 1), 
+          ggarrange(pj1, pj2, pj3, ncol = 1),
+          ggarrange(pk1, pk2, pk3, ncol = 1),
+          ggarrange(pl1, pl2, pl3, ncol = 1), 
+          pbox, 
+          # ggarrange(pa1, pa2, pa3, ncol = 1),
+          nrow = 1, labels=c("a", "b", "c", "d", "e", "f"), font.label = fl)
 dev.off()
 system(paste("convert", "-density", "200", pdfname, jpgname))
 

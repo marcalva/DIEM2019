@@ -147,11 +147,9 @@ seurat_pipe_single <- function(counts,
 	seur <- CreateSeuratObject(counts, project = project, min.features=min.features, meta.data=meta.data)
 	seur <- seurat_norm(seur, scale.factor=scale.factor)
 	seur <- seurat_cluster(seur)
-	markers <- FindAllMarkers(seur, only.pos=TRUE)
 
 	# Save
 	saveRDS(seur, paste0(dp, project, ".seur_obj.rds"))
-	write.table(markers, paste0(dr, project, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 
 	# Plot
 	pdfname <- paste0(dir_plot, project, ".seur_clusters.pdf")
@@ -185,12 +183,23 @@ seurat_pipe_single <- function(counts,
 	print(p)
 	dev.off()
 	system(paste("convert", "-density", "200", pdfname, jpgname))
+
+	#pdfname <- paste0(dir_plot, project, ".seur_DebrisLogOdds.pdf")
+	#jpgname <- paste0(dir_plot, project, ".seur_DebrisLogOdds.jpeg")
+	#pdf(pdfname, width=9,height=9)
+	#p <- plot_umap_meta(seur, colname="DebrisLogOdds", legend_name="Debris log odds")
+	#print(p)
+	#dev.off()
+	#system(paste("convert", "-density", "200", pdfname, jpgname))
+
+	markers <- FindAllMarkers(seur, only.pos=TRUE)
+	write.table(markers, paste0(dr, project, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 }
 
 seurat_pipe_list <- function(counts.l, 
 							 dir_label, 
 							 project.l, 
-							 project_out, 
+							 project, 
 							 method, 
 							 meta.data.l=NULL, 
 							 min.features=200, 
@@ -213,42 +222,51 @@ seurat_pipe_list <- function(counts.l,
 	seur.list <- lapply(seur.list, seurat_norm, scale.factor=scale.factor)
 	seur <- seurat_merge(seur.list)
 	seur <- seurat_cluster(seur)
-	markers <- FindAllMarkers(seur, only.pos=TRUE)
 
 	# Save
-	saveRDS(seur, paste0(dp, project_out, ".seur_obj.rds"))
-	write.table(markers, paste0(dr, project_out, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+	saveRDS(seur, paste0(dp, project, ".seur_obj.rds"))
 
 	# Plot
-	pdfname <- paste0(dir_plot, project_out, ".seur_clusters.pdf")
-	jpgname <- paste0(dir_plot, project_out, ".seur_clusters.jpeg")
+	pdfname <- paste0(dir_plot, project, ".seur_clusters.pdf")
+	jpgname <- paste0(dir_plot, project, ".seur_clusters.jpeg")
 	pdf(pdfname, width=9,height=9)
 	p <- plot_umap_labels(seur)
 	print(p)
 	dev.off()
 	system(paste("convert", "-density", "200", pdfname, jpgname))
 
-	pdfname <- paste0(dir_plot, project_out, ".seur_mt_pct.pdf")
-	jpgname <- paste0(dir_plot, project_out, ".seur_mt_pct.jpeg")
+	pdfname <- paste0(dir_plot, project, ".seur_mt_pct.pdf")
+	jpgname <- paste0(dir_plot, project, ".seur_mt_pct.jpeg")
 	pdf(pdfname, width=9,height=9)
 	p <- plot_umap_meta(seur)
 	print(p)
 	dev.off()
 	system(paste("convert", "-density", "200", pdfname, jpgname))
 
-	pdfname <- paste0(dir_plot, project_out, ".seur_malat1.pdf")
-	jpgname <- paste0(dir_plot, project_out, ".seur_malat1.jpeg")
+	pdfname <- paste0(dir_plot, project, ".seur_malat1.pdf")
+	jpgname <- paste0(dir_plot, project, ".seur_malat1.jpeg")
 	pdf(pdfname, width=9,height=9)
 	p <- plot_umap_meta(seur, colname="MALAT1", legend_name="MALAT1")
 	print(p)
 	dev.off()
 	system(paste("convert", "-density", "200", pdfname, jpgname))
 
-	pdfname <- paste0(dir_plot, project_out, ".seur_ngene.pdf")
-	jpgname <- paste0(dir_plot, project_out, ".seur_ngene.jpeg")
+	pdfname <- paste0(dir_plot, project, ".seur_ngene.pdf")
+	jpgname <- paste0(dir_plot, project, ".seur_ngene.jpeg")
 	pdf(pdfname, width=9,height=9)
 	p <- plot_umap_meta(seur, colname="nFeature_RNA", legend_name="n_genes")
 	print(p)
 	dev.off()
 	system(paste("convert", "-density", "200", pdfname, jpgname))
+
+	#pdfname <- paste0(dir_plot, project, ".seur_DebrisLogOdds.pdf")
+	#jpgname <- paste0(dir_plot, project, ".seur_DebrisLogOdds.jpeg")
+	#pdf(pdfname, width=9,height=9)
+	#p <- plot_umap_meta(seur, colname="DebrisLogOdds", legend_name="Debris log odds")
+	#print(p)
+	#dev.off()
+	#system(paste("convert", "-density", "200", pdfname, jpgname))
+
+	markers <- FindAllMarkers(seur, only.pos=TRUE)
+	write.table(markers, paste0(dr, project, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 }

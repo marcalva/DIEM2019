@@ -32,6 +32,11 @@ countsl <- lapply(scel, function(x) {
                   counts <- x@counts[,debris]
                   return(counts)
 	})
+mdl <- lapply(scel, function(x) {
+              debris <- get_removed_ids(x)
+              md <- x@droplet_data[debris,]
+              return(md)
+    })
 
 method <- "diem_debris"
 dp <- paste0("data/processed/", label, "/", method, "/"); dir.create(dp, recursive=TRUE, showWarnings=FALSE)
@@ -41,7 +46,19 @@ dir_plot <- paste0(dr, "plots/"); dir.create(dir_plot, recursive=TRUE, showWarni
 seurat_pipe_list(countsl, 
                  dir_label = label, 
                  project.l = lab_ids, 
-                 project_out = label, 
+                 meta.data.l = mdl, 
+                 project = label, 
                  method = method, 
                  scale.factor = 1e3)
+
+# Add percent of reads spliced
+ifn <- "data/raw/splice_frctn/all.splice_fraction.txt"
+sf <- read.table(ifn, header = TRUE, row.names = 1)
+
+seur <- readRDS(paste0(dp, label, ".seur_obj.rds"))
+
+seur$SpliceFrctn <- 100 * sf[colnames(seur),1]
+
+saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
+
 

@@ -18,6 +18,17 @@ source("scripts/common/overlap_graph.R")
 # Functions
 #=========================================
 
+set_breaks_10 <- function(x){
+    xmax <- x[2]
+    bk <- 10
+    brks <- c(bk)
+    while (bk < xmax){
+        bk <- bk * 10
+        brks <- c(brks, bk)
+    }
+    return(brks)
+}
+
 plot_umi_genes <- function(x,
                            color="Call",
                            color_name="Call",
@@ -84,7 +95,7 @@ ts <- lapply(names(sce_all), function(s){
 
 ts_all <- do.call(rbind, ts)
 ts_all$Call <- factor(ts_all$Call, levels=c("Debris", "Clean"))
-ts_all$ProbDebris <- 1 - ts_all$CleanProb
+ts_all$ProbDebris <- ts_all$DebrisProb
 ts_all$Dataset <- factor(ts_all$Dataset, levels=rev(names(sce_all)))
 alpha <- 0.1; color_name <- color <-"ProbDebris"
 
@@ -96,7 +107,9 @@ ylab("Number of genes detected") +
 scale_x_continuous(trans='log10', labels=scales::comma) +
 scale_y_continuous(trans='log10', labels=scales::comma) +
 theme_minimal() + theme(text=element_text(size=22)) +
-scale_color_distiller(palette="RdBu", direction=-1, name="Probability\ndebris")
+scale_color_distiller(palette="RdBu", 
+                      direction=-1, 
+                      name="Probability\ndebris")
 # scale_colour_discrete(name=color_name)
 
 dir_plot <- paste0("results/plots/"); dir.create(dir_plot, showWarnings=FALSE, recursive=TRUE)

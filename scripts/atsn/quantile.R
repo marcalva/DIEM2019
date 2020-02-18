@@ -34,3 +34,4 @@ if (is.na(i)){
 
 counts <- diem::read_10x(dir10X[i])
 quantile_pipe_out <- quantile_pipe(counts, dir_label=label, project=lab_ids[i])
+

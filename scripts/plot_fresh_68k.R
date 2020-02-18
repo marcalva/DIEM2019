@@ -83,7 +83,7 @@ df_kept <- data.frame(seur_ED@meta.data[colnames(seur_diem),], Filter="DIEM &\nE
 df_rm <- data.frame(seur_ED@meta.data[names_diff,], Filter="EmptyDrops\nOnly")
 
 datn <- data.frame(Method=c("DIEM &\nEmptyDrops", "EmptyDrops\nOnly"), 
-                   y=c(18, 18), 
+                   y=c(19, 19), 
                    N=c(paste0("n=", as.character(nrow(df_kept))), paste0("n=", as.character(nrow(df_rm)))))
 
 datf_kept_rm <- rbind(df_kept, df_rm)
@@ -134,10 +134,10 @@ mt_ED <- sapply(rownames(overlape), function(x){mean(seur_ED@meta.data[seur_ED@m
 mt_dieme <- sapply(colnames(overlape), function(x){mean(seur_diem@meta.data[seur_diem@meta.data[,ctype] == x,"percent.mt"])})
 
 pe1 <- overlap_graph(overlapq, mt_quant, mt_diemq, labels1="Quantile", labels2="DIEM", 
-                     main="Fresh 68K PBMCs", col_title="Total UMIs", 
+                     main="Fresh 68K PBMCs", col_title="MT%", 
                      scale_size = .8)
 pe2 <- overlap_graph(overlape, mt_ED, mt_dieme, labels1="EmptyDrops", labels2="DIEM", 
-                     main="Fresh 68K PBMCs", col_title="Total UMIs", 
+                     main="Fresh 68K PBMCs", col_title="MT%", 
                      scale_size = .8)
 
 #
