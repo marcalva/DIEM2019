@@ -113,9 +113,14 @@ seur_quant_at$SpliceFrctn <- 100*sf[rownames(seur_quant_at@meta.data),"SpliceFrc
 seur_ED_at <- readRDS("data/processed/atsn/emptydrops/atsn.seur_obj.rds")
 seur_ED_at$SpliceFrctn <- 100*sf[rownames(seur_ED_at@meta.data),"SpliceFrctn"]
 
+# fresh 68k
+seur_diem_b <- readRDS("data/processed/fresh_68k/diem/fresh_68k.seur_obj.rds")
+seur_ED_b <- readRDS("data/processed/fresh_68k/emptydrops/fresh_68k.seur_obj.rds")
+
 seur_ad = list("DIEM" = seur_diem_ad, "EmptyDrops" = seur_ED_ad, "Quantile" = seur_quant_ad)
 seur_mb = list("DIEM" = seur_diem_mb, "EmptyDrops" = seur_ED_mb, "Quantile" = seur_quant_mb)
 seur_at = list("DIEM" = seur_diem_at, "EmptyDrops" = seur_ED_at, "Quantile" = seur_quant_at)
+seur_b <- list("DIEM" = seur_diem_b, "EmptyDrops" = seur_ED_b)
 
 #=========================================
 # Plot
@@ -217,6 +222,8 @@ seur_diem_mb <- FindClusters(seur_diem_mb, resolution=2)
 #seur_ED_ad <- FindClusters(seur_ED_ad, resolution=2)
 #seur_ED_mb <- FindClusters(seur_ED_mb, resolution=2)
 #seur_ED_at <- FindClusters(seur_ED_at, resolution=2)
+seur_diem_b <- FindClusters(seur_diem_b, resolution=2)
+
 
 # Cluster overlap
 ctype="RNA_snn_res.0.8"
@@ -238,19 +245,25 @@ at_overlap <- comp_clust(seur_ED_at, seur_diem_at, ct_col1=ctype, ct_col2=ctype2
 mt_ED_at <- sapply(rownames(at_overlap), function(x){mean(seur_ED_at@meta.data[seur_ED_at@meta.data[,ctype] == x,"SpliceFrctn"], na.rm=T)})
 mt_diem_at <- sapply(colnames(at_overlap), function(x){mean(seur_diem_at@meta.data[seur_diem_at@meta.data[,ctype2] == x,"SpliceFrctn"], na.rm=T)})
 
+b_overlap <- comp_clust(seur_ED_b, seur_diem_b, ct_col1=ctype, ct_col2=ctype2)
+mt_ED_b <- sapply(rownames(b_overlap), function(x){mean(seur_ED_b@meta.data[seur_ED_b@meta.data[,ctype] == x,"percent.mt"], na.rm=T)})
+mt_diem_b <- sapply(colnames(b_overlap), function(x){mean(seur_diem_b@meta.data[seur_diem_b@meta.data[,ctype2] == x,"percent.mt"], na.rm=T)})
+
 
 ps1 <- overlap_graph(mbq_overlap, mtq_quant_mb, mtq_diem_mb, labels1="Quantile", labels2="DIEM (Res. 2)", main="Mouse Brain", col_title=coltitle)
 ps2 <- overlap_graph(mb_overlap, mt_ED_mb, mt_diem_mb, labels1="EmptyDrops", labels2="DIEM (Res. 2)", main="Mouse Brain", col_title=coltitle)
 ps3 <- overlap_graph(atq_overlap, atq_quant_at, atq_diem_at, labels1="Quantile", labels2="DIEM (Res. 2)", main="Adipose Tissue", col_title=coltitle)
 ps4 <- overlap_graph(at_overlap, mt_ED_at, mt_diem_at, labels1="EmptyDrops", labels2="DIEM (Res. 2)", main="Adipose Tissue", col_title=coltitle)
 
+ps5 <- overlap_graph(b_overlap, mt_ED_b, mt_diem_b, labels1="EmptyDrops", labels2="DIEM (Res. 2)", main="Fresh 68K PBMCs", col_title="MT%")
+
 # Arrange into plot
 dir_plot <- paste0("results/plots/"); dir.create(dir_plot, showWarnings=FALSE, recursive=TRUE)
 pdfname <- paste0(dir_plot, "clust_overlaps.res2.pdf")
 jpgname <- paste0(dir_plot, "clust_overlaps.res2.jpeg")
 pdf(pdfname, width=20, height=14)
-ggarrange(ps1, ps2, ps3, ps4, nrow=1, 
-          labels=c("a", "", "b", ""),
+ggarrange(ps1, ps2, ps3, ps4, ps5, nrow=1, 
+          labels=c("a", "", "b", "", "c"),
           font.label = list(size = 30, face="bold"))
 dev.off()
 system(paste("convert", "-density", "200", pdfname, jpgname))

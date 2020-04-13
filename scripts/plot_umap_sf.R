@@ -30,7 +30,8 @@ plot_umap_fct <- function(x, names, colname="SpliceFrctn", legend_name="Fraction
 	dfl <- lapply(1:length(x), function(i) {
                   data.frame(Mito=x[[i]]@meta.data[,colname], 
                              UMAP1=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_1"], 
-                             UMAP2=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_2"], Method=names[[i]])
+                             UMAP2=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_2"], 
+                             Method=names[[i]])
                           })
 	df <- do.call(rbind, dfl)
     if (order_col) df <- df[order(df$Mito, decreasing=FALSE),,drop=FALSE]
@@ -105,7 +106,7 @@ system(paste("convert", "-density", "200", pdfname, jpgname))
 
 
 #=========================================
-# Poportion of droplets with high spliced reads
+# Proportion of droplets with high spliced reads
 #=========================================
 
 above_sd <- function(seur, trait = "SpliceFrctn", thresh = NULL){

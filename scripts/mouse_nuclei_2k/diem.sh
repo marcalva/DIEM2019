@@ -2,7 +2,7 @@
 #$ -cwd
 #$ -j y
 #$ -pe shared 4
-#$ -l h_data=4000M,h_rt=3:00:00,highp
+#$ -l h_data=4000M,h_rt=9:00:00,highp
 #$ -v QQAPP=openmp
 #$ -M malvarez@mail
 #  Notify at beginning and end of job

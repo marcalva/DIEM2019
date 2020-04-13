@@ -15,12 +15,12 @@ overlap_graph <- function(x, cols1, cols2, labels1=NULL, labels2=NULL, col_title
 	cols2 <- cols2[order(c_ord, decreasing=TRUE)]
 
 	# Scale colors
-	#minc <- min(cols1, cols2)
-	#cols1 <- cols1 - minc
-	#cols2 <- cols2 - minc
-	#maxc <- max(cols1, cols2)
-	#cols1 <- cols1/maxc
-	#cols2 <- cols2/maxc
+	minc <- min(cols1, cols2)
+	cols1 <- cols1 - minc
+	cols2 <- cols2 - minc
+	maxc <- max(cols1, cols2)
+	cols1 <- cols1/maxc
+	cols2 <- cols2/maxc
 
 	ny <- max(nrow(x), ncol(x))
 	xlim <- c(0.75,2.25)

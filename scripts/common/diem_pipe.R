@@ -1,10 +1,31 @@
 
-diem_pipe <- function(counts, 
-					  dir_label, 
-					  project, 
-					  method="diem", 
-					  ...){
-	require(diem)
+diem_pipe1 <- function(counts, 
+                       dir_label, 
+                       project, 
+                       method="diem", 
+                       ...){
+    require(diem)
+
+    dp <- paste0("data/processed/", dir_label, "/", method, "/")
+    dir.create(dp, recursive=TRUE, showWarnings=FALSE)
+    dr <- paste0("results/", dir_label, "/", method, "/")
+    dir.create(dr, recursive=TRUE, showWarnings=FALSE)
+    dir_plot <- paste0(dr, "plots/")
+    dir.create(dir_plot, recursive=TRUE, showWarnings=FALSE)
+
+    sce <- create_SCE(counts, name=project)
+    sce <- diem(sce, ...)
+    saveRDS(sce, paste0(dp, project, ".diem_sce.rds"))
+    return(sce)
+}
+
+diem_pipe2 <- function(sce, 
+                       dir_label, 
+                       project, 
+                       thresh = 0.5, 
+                       p_method = "fdr", 
+                       method="diem"){
+    require(diem)
 
 	dp <- paste0("data/processed/", dir_label, "/", method, "/")
 	dir.create(dp, recursive=TRUE, showWarnings=FALSE)
@@ -13,9 +34,12 @@ diem_pipe <- function(counts,
 	dir_plot <- paste0(dr, "plots/")
 	dir.create(dir_plot, recursive=TRUE, showWarnings=FALSE)
 
-	sce <- create_SCE(counts, name=project)
-	sce <- diem(sce, ...)
-	# sce <- get_pi(sce)
+    fn <- paste0(dp, project, ".diem_sce.rds")
+
+    sce <- assign_clusters(sce)
+    sce <- estimate_dbr_score(sce, p_method = p_method)
+    sce <- call_targets(sce, thresh = thresh)
+
 	# Save
 	saveRDS(sce, paste0(dp, project, ".diem_sce.rds"))
 
@@ -51,13 +75,6 @@ diem_pipe <- function(counts,
     jpgname <- paste0(dir_plot, label, "umi_gene.malat1.jpeg")
     pdf(pdfname, width=9,height=9)
     plot_umi_gene(sce, color="MALAT1", color_name="MALAT1")
-    dev.off()
-    system(paste("convert", "-density", "200", pdfname, jpgname))
-
-    pdfname <- paste0(dir_plot, project, ".dist.pdf")
-    jpgname <- paste0(dir_plot, label, ".dist.jpeg")
-    pdf(pdfname, width=9,height=9)
-    plot_dist(sce)
     dev.off()
     system(paste("convert", "-density", "200", pdfname, jpgname))
 

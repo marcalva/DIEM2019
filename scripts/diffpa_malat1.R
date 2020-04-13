@@ -44,18 +44,22 @@ boxplot_ft_fct <- function(x, names, ct_col="RNA_snn_res.0.8",
 						   colname="percent.mt", ylab="MT%", 
 						   color_breaks=waiver(), 
 						   size=1){
-	dfl <- lapply(1:length(x), function(i) data.frame(Mito=x[[i]]@meta.data[,colname], Cluster=x[[i]]@meta.data[,ct_col], Method=names[[i]]))
+	dfl <- lapply(1:length(x), function(i) {
+                  data.frame(Mito=x[[i]]@meta.data[,colname], 
+                             Cluster=as.character(x[[i]]@meta.data[,ct_col]), 
+                             Method=names[[i]])
+                           })
 	df <- do.call(rbind, dfl)
 	df <- reshape2::melt(df)
     df$Method <- factor(df$Method, levels=names)
 
 	p <- ggplot(df, aes(x=Cluster, y=value)) +
 	geom_boxplot(outlier.shape = NA) + theme_bw() + 
-	facet_wrap(~Method) + 
+	facet_wrap(~Method, scales = "free_x") + 
 	ylab(ylab) + 
 	theme(legend.position="none", 
-		  text=element_text(size=16),
-		  axis.text.x=element_text(size=10), 
+		  text=element_text(size=12),
+		  axis.text.x=element_text(size=8), 
 		  plot.title=element_text(hjust=0.5)) 
 	return(p)
 }
@@ -63,7 +67,12 @@ boxplot_ft_fct <- function(x, names, ct_col="RNA_snn_res.0.8",
 plot_umap_fct <- function(x, names, colname="percent.mt", legend_name="MT%", 
 						  color_limits=NULL, color_breaks=waiver(),
 						  size=1){
-	dfl <- lapply(1:length(x), function(i) data.frame(Mito=x[[i]]@meta.data[,colname], UMAP1=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_1"], UMAP2=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_2"], Method=names[[i]]))
+	dfl <- lapply(1:length(x), function(i){
+                  data.frame(Mito=x[[i]]@meta.data[,colname], 
+                             UMAP1=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_1"], 
+                             UMAP2=x[[i]]@reductions$umap@cell.embeddings[,"UMAP_2"], 
+                             Method=names[[i]])
+                          })
 	df <- do.call(rbind, dfl)
 
 	p <- ggplot(df, aes(x=UMAP1, y=UMAP2, color=Mito)) + 
@@ -87,17 +96,15 @@ p_blank <- ggplot() + theme_void()
 
 # Variables
 methd_names <- c("Quantile", "EmptyDrops", "DIEM")
-methd <- factor(c(methd_names, methd_names, methd_names), levels=c("Quantile", "EmptyDrops", "DIEM"))
+methd <- factor(methd_names, levels=c("Quantile", "EmptyDrops", "DIEM"))
 
+dir_plot <- "results/plots/"
+w = 6
+h = 3
 
 #=========================================
 # Read in data
 #=========================================
-
-# Adipocyte
-labl <- "adpcyte"
-dp <- paste0("data/processed/", labl, "/")
-dir_plot <- paste0("results/", labl, "/plots/")
 
 # Read in DIEM SCE
 sce_ad <- readRDS("data/processed/adpcyte/diem/adpcyte.diem_sce.rds")
@@ -112,32 +119,18 @@ seur_quant_ad <- get_nuc_linc(seur_quant_ad)
 seur_ED_ad <- get_nuc_linc(seur_ED_ad)
 seur_diem_ad <- get_nuc_linc(seur_diem_ad)
 
-
-# Get average MT% across all passed droplets
-methd <- factor(c("Quantile", "EmptyDrops", "DIEM"), levels=c("Quantile", "EmptyDrops", "DIEM"))
-ncel <- c(mean(seur_quant_ad$MALAT1), mean(seur_ED_ad$MALAT1), mean(seur_diem_ad$MALAT1))
-datf1 <- data.frame(Method=methd, Nuclei=ncel)
-
-# Get average UMI across all passed droplets
-methd <- factor(c("Quantile", "EmptyDrops", "DIEM"))
-ncel <- c(mean(seur_quant_ad$nCount_RNA), mean(seur_ED_ad$nCount_RNA), mean(seur_diem_ad$nCount_RNA))
-datf2 <- data.frame(Method=methd, Nuclei=ncel)
-
 pm <- boxplot_ft_fct(list(seur_quant_ad, seur_ED_ad, seur_diem_ad), 
                      names=methd, colname="MALAT1", ylab="MALAT1%") + ggtitle("DiffPA")
+outfn <- paste0(dir_plot, "diffpa.cluster.malat1.pdf")
+ggsave(outfn, width = w, height = h)
+outfn <- paste0(dir_plot, "diffpa.cluster.malat1.jpeg")
+ggsave(outfn, width = w, height = h)
+
 pu <-boxplot_ft_fct(list(seur_quant_ad, seur_ED_ad, seur_diem_ad), 
                     names=methd, colname="nCount_RNA", ylab="Total UMI counts") + coord_trans(y="log10")
-
-
-p_blank <- ggplot() + theme_void()
-
-# Arrange into plot
-dir_plot <- paste0("results/plots/"); dir.create(dir_plot, showWarnings=FALSE, recursive=TRUE)
-pdfname <- paste0(dir_plot, "diffpa_malat1_numi.pdf")
-jpgname <- paste0(dir_plot, "diffpa_malat1_numi.jpeg")
-pdf(pdfname, width=10, height=10)
-ggarrange(ggarrange(p_blank, pm, widths=c(.025,.975)), pu, ncol=1, labels=c("a", "b"), font.label = list(size = 20, face="bold"))
-dev.off()
-system(paste("convert", "-density", "200", pdfname, jpgname))
+outfn <- paste0(dir_plot, "diffpa.cluster.logUMI.pdf")
+ggsave(outfn, width = w, height = h)
+outfn <- paste0(dir_plot, "diffpa.cluster.logUMI.jpeg")
+ggsave(outfn, width = w, height = h)
 
 

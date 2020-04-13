@@ -86,38 +86,33 @@ names(scel) <- lab_ids
 sce_all <- rev(c(DiffPA=sce_ad, "Mouse Brain"=sce_mb, scel))
 
 ts <- lapply(names(sce_all), function(s){
-             datf <- sce_all[[s]]@droplet_data[sce_all[[s]]@test_set,]
+             datf <- sce_all[[s]]@test_data
              datf[,"Dataset"] <- s
-             datf[datf$Call == "Removed","Call"] <- "Debris"
              datf <- datf[order(datf$Call),]
              return(datf)
                                })
 
-ts_all <- do.call(rbind, ts)
-ts_all$Call <- factor(ts_all$Call, levels=c("Debris", "Clean"))
-ts_all$ProbDebris <- ts_all$DebrisProb
-ts_all$Dataset <- factor(ts_all$Dataset, levels=rev(names(sce_all)))
+ts_all <- as.data.frame(do.call(rbind, ts))
+ts_all[,"Call"] <- factor(ts_all[,"Call"], levels=c("Debris", "Clean"))
+ts_all[,"Dataset"] <- factor(ts_all$Dataset, levels=rev(names(sce_all)))
 alpha <- 0.1; color_name <- color <-"ProbDebris"
 
 p <- ggplot(ts_all, aes(x=total_counts, y=n_genes)) + 
-geom_point(alpha=alpha, aes_string(colour=color)) +
+geom_point(alpha=alpha, aes(color=Call), size = 0.75) +
 facet_wrap(~Dataset, nrow=4, scales="free") + 
 xlab("Total UMI count") +
 ylab("Number of genes detected") +
 scale_x_continuous(trans='log10', labels=scales::comma) +
 scale_y_continuous(trans='log10', labels=scales::comma) +
-theme_minimal() + theme(text=element_text(size=22)) +
-scale_color_distiller(palette="RdBu", 
-                      direction=-1, 
-                      name="Probability\ndebris")
-# scale_colour_discrete(name=color_name)
+theme_minimal() + 
+theme(text=element_text(size=16), 
+      axis.text.x = element_text(angle = 30, hjust = 0.9)) + 
+guides(colour = guide_legend(override.aes = list(alpha = 1, size = 1.5)))
 
 dir_plot <- paste0("results/plots/"); dir.create(dir_plot, showWarnings=FALSE, recursive=TRUE)
 pdfname <- paste0(dir_plot, "n_umi.n_gene.call.diem.pdf")
 jpgname <- paste0(dir_plot, "n_umi.n_gene.call.diem.jpeg")
-pdf(pdfname, width=10, height=12)
-p
-dev.off()
-system(paste("convert", "-density", "300", pdfname, jpgname))
+ggsave(pdfname, width = 6, height = 10)
+ggsave(jpgname, width = 6, height = 10)
 
 

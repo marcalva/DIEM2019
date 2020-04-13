@@ -34,7 +34,8 @@ countsl <- lapply(scel, function(x) {
 	})
 mdl <- lapply(scel, function(x) {
 	filtered <- get_clean_ids(x)
-	md <- x@droplet_data[filtered,]
+	md <- x@test_data[filtered,]
+    md[,"Sample"] <- x@name
 	return(md)
 	})
 
@@ -52,4 +53,8 @@ seurat_pipe_list(countsl,
                  project=label, 
                  method=method, 
                  scale.factor=1e3)
+
+seur <- readRDS(paste0(dp, label, ".seur_obj.rds"))
+
+tapply(seur@meta.data$SpliceFrctn, seur@meta.data$RNA_snn_res.0.8, mean)
 

@@ -78,7 +78,7 @@ lab_ids <- c("AT1", "AT2", "AT3", "AT4", "AT5", "AT6")
 seur_diem_at <- readRDS("data/processed/atsn/diem/atsn.seur_obj.rds")
 seur_at <- lapply(lab_ids, function(i){
                   cells_all <- rownames(seur_diem_at@meta.data)
-                  keep <- seur_diem_at$orig.ident == i
+                  keep <- seur_diem_at$Sample == i
                   cells <- cells_all[keep]
                   s <- subset(seur_diem_at, cells=cells)
                   s <- seurat_norm(s, scale.factor=1000)
@@ -87,13 +87,6 @@ seur_at <- lapply(lab_ids, function(i){
 
 seurl <- c(seur_diem_ad, seur_diem_mb, seur_at)
 names(seurl) <- c("DiffPA", "Mouse Brain", lab_ids)
-
-# Drop clusters
-seurl <- lapply(seurl, function(s){
-                s$Cluster <- as.integer(s$Cluster) - 2
-                s$Cluster <- factor(s$Cluster)
-                return(s)
-})
 
 #=========================================
 # Cluster
@@ -104,6 +97,21 @@ seurl <- lapply(seurl, function(s){
                 s <- FindClusters(s)
                 return(s)
 })
+
+seurl <- lapply(seurl, function(s){
+                tb <- table(s@meta.data[,"Cluster"])
+                keep <- names(tb)[tb >= 30]
+                cells <- rownames(s@meta.data)[s$Cluster %in% keep]
+                s <- subset(s, cells=cells)
+                s@meta.data[,"Cluster"] <- as.character(s@meta.data[,"Cluster"])
+                clusters <- sort(unique(s@meta.data[,"Cluster"]))
+                map <- 1:length(clusters)
+                names(map) <- clusters
+                s@meta.data[,"Cluster"] <- map[s@meta.data[,"Cluster"]]
+                s$RNA_snn_res.0.8 <- factor(s$RNA_snn_res.0.8)
+                return(s)
+})
+
 
 #=========================================
 # Overlap Seurat clusters and MN clusters
@@ -153,9 +161,12 @@ summary(unlist(lapply(overlaps, function(o) apply(o, 2, max)*100)))
 #=========================================
 
 marker_genes <- function(sce, only.pos =TRUE){
-    zw <- colSums(sce@emo[[1]]$Z)
+    llk <- sce@model$llk
+    Pi <- sce@model$params$Pi
+    Z <- llk_pi <- t(apply(llk, 1, function(j) j + log(Pi)))
+    zw <- colSums(Z)
     zw <- zw[-1]
-    pbar <- sce@emo[[1]]$params$Alpha
+    pbar <- sce@model$params$Alpha
     pbar <- pbar[,-c(1)]
     pbar <- sweep(pbar, 2, colSums(pbar), "/")
     clusts <- 1:ncol(pbar)
@@ -174,13 +185,14 @@ marker_genes <- function(sce, only.pos =TRUE){
 }
 
 sce_ad <- readRDS("data/processed/adpcyte/diem/adpcyte.diem_sce.rds")
+seur_diem_ad <- seurl[[1]]
 markers_ad <- marker_genes(sce_ad)
 seur_diem_ad@meta.data$Cluster = factor(seur_diem_ad@meta.data$Cluster, 
                                         labels = 0:(length(unique(seur_diem_ad@meta.data$Cluster))-1))
 
 sce_at <- readRDS("data/processed/atsn/diem/AT2.diem_sce.rds")
 markers_at <- marker_genes(sce_at)
-seur_diem_at2 <- seur_diem_at[,seur_diem_at$orig.ident == "AT2"]
+seur_diem_at2 <- seurl[[4]]
 seur_diem_at2@meta.data$Cluster = factor(seur_diem_at2@meta.data$Cluster, 
                                          labels = 0:(length(unique(seur_diem_at2@meta.data$Cluster))-1))
 pumap1 <- plot_umap_labels(seur_diem_ad, "Cluster") + ggtitle("DiffPA DIEM clusters") + ct
@@ -190,7 +202,7 @@ pm3 <- plot_umap_gene(seur_diem_ad, "GPAM", size = 1) + ggtitle("GPAM") + ct
 
 pumap2 <- plot_umap_labels(seur_diem_at2, "Cluster") + ggtitle("AT2 DIEM clusters") + ct
 pn1 <- plot_umap_gene(seur_diem_at2, "VWF", size = 1) + ggtitle("VWF") + ct
-pn2 <- plot_umap_gene(seur_diem_at2, "RBPJ", size = 1) + ggtitle("RBPJ") + ct
+pn2 <- plot_umap_gene(seur_diem_at2, "CD14", size = 1) + ggtitle("CD14") + ct
 pn3 <- plot_umap_gene(seur_diem_at2, "GPAM", size = 1) + ggtitle("GPAM") + ct
 
 
@@ -209,7 +221,5 @@ ggarrange(
     widths = c(.25, .25, .5))
 dev.off()
 system(paste("convert", "-density", "300", pdfname, jpgname))
-
-
 
 

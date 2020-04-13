@@ -4,8 +4,6 @@
 setwd("../")
 
 
-labl <- "adpcyte"
-
 
 old_ids <- c("DiffPA18", "mouse_nuclei_2k", "SAT3", "SAT5", "SAT1", "SAT4", "SAT6", "SAT2")
 lab_ids <- c("adpcyte", "mouse_nuclei_2k", "AT1", "AT2", "AT3", "AT4", "AT5", "AT6")
@@ -20,6 +18,7 @@ datfl <- lapply(1:length(old_ids), function(a){
 
 datf <- do.call(rbind, datfl)
 
+rownames(datf) <- sub("-", "_", rownames(datf))
 
 
 write.table(datf, 

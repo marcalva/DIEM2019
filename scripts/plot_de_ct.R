@@ -51,7 +51,7 @@ geom_point(shape=16) +
 theme_minimal() +
 xlim(c(-max(de$logFC), max(de$logFC))) +
 scale_color_brewer(palette="Set1", breaks="significant", 
-                   labels="significant", name="") +
+                   labels="Bonferroni\np < 0.05", name="") +
 ylab(expression(-log[10](P))) +
 ggtitle("DE between debris\nand nuclei") + 
 theme(text=element_text(size=18), 

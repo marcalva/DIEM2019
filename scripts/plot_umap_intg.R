@@ -63,9 +63,7 @@ methd_names <- c("Quantile", "EmptyDrops", "DIEM")
 #=========================================
 
 post_merged <- readRDS("data/processed/atsn/diem/atsn.seur_obj.rds")
-pre_merged <- readRDS("data/processed/atsn/diem_integrated.fltr.1/atsn.seur_obj.rds")
-
-
+pre_merged <- readRDS("data/processed/atsn/diem_integrated/atsn.seur_obj.rds")
 
 #=========================================
 # UMAP plots
@@ -85,8 +83,5 @@ ggarrange(p1, p2, nrow = 1, labels=c("a", "b"),
         font.label = list(size = 18, face="bold"))
 dev.off()
 system(paste("convert", "-density", "300", pdfname, jpgname))
-
-
-
 
 

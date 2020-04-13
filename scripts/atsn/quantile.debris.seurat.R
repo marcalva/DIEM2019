@@ -24,8 +24,6 @@ names(dir10X) <- lab_ids
 #=========================================
 
 # Make directories
-
-	# Create directories
 dp <- paste0("data/processed/", label, "/", method, "/")
 
 quantile.l <- lapply(lab_ids, function(x) {
@@ -57,4 +55,36 @@ seur$SpliceFrctn <- 100 * sf[colnames(seur),1]
 
 saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
 
+# Add percent of reads spliced
+ifn <- "data/raw/splice_frctn/all.splice_fraction.txt"
+sf <- read.table(ifn, header = TRUE, row.names = 1)
+
+seur <- readRDS(paste0(dp, label, ".seur_obj.rds"))
+
+seur$SpliceFrctn <- 100 * sf[colnames(seur),1]
+
+saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
+
+tapply(seur@meta.data$SpliceFrctn, seur@meta.data$RNA_snn_res.0.8, mean)
+
+# Find markers
+markers <- FindAllMarkers(seur, only.pos = TRUE)
+
+from <- seq(0,8)
+to <- c("Stm", 
+        "Adp", 
+        "Myl", 
+        "Dbr-1", 
+        "Vsc-1", 
+        "T", 
+        "Vsc-2", 
+        "Dbr-2", 
+        "Mast") 
+
+map <- to
+names(map) <- from
+
+seur@meta.data$CellType <- map[as.character(seur@meta.data$RNA_snn_res.0.8)]
+
+saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
 

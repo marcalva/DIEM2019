@@ -121,7 +121,7 @@ seurat_cluster <- function(x){
 	# umap <- import("umap")
 	x <- FindNeighbors(x, dims = 1:30, verbose = TRUE)
 	x <- FindClusters(x, verbose = TRUE)
-	x <- RunUMAP(x, dims = 1:30, reduction = "pca", verbose = TRUE, spread=5)
+	x <- RunUMAP(x, dims = 1:30, reduction = "pca", verbose = TRUE)
 	# x <- merge_clust(x)
 	return(x)
 }
@@ -267,6 +267,6 @@ seurat_pipe_list <- function(counts.l,
 	#dev.off()
 	#system(paste("convert", "-density", "200", pdfname, jpgname))
 
-	markers <- FindAllMarkers(seur, only.pos=TRUE)
-	write.table(markers, paste0(dr, project, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+	#markers <- FindAllMarkers(seur, only.pos=TRUE)
+	#write.table(markers, paste0(dr, project, ".seur_markers.txt"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 }

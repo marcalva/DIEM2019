@@ -26,8 +26,6 @@ names(dir10X) <- lab_ids
 #=========================================
 
 # Make directories
-
-	# Create directories
 dp <- paste0("data/processed/", label, "/", method, "/")
 
 emptydrops.l <- lapply(lab_ids, function(x) {
@@ -61,4 +59,28 @@ seur$SpliceFrctn <- 100 * sf[colnames(seur),1]
 
 saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
 
+tapply(seur@meta.data$SpliceFrctn, seur@meta.data$RNA_snn_res.0.8, mean)
+
+# Find markers
+markers <- FindAllMarkers(seur, only.pos = TRUE)
+
+from <- seq(0,10)
+to <- c("Adp-1", 
+        "Adp-2", 
+        "Adp-3", 
+        "Dbr-1", 
+        "Stm-1", 
+        "Dbr-2", 
+        "Dbr-3", 
+        "Dbr-4", 
+        "Vsc", 
+        "Dbr-5", 
+        "Dbr-6") 
+
+map <- to
+names(map) <- from
+
+seur@meta.data$CellType <- map[as.character(seur@meta.data$RNA_snn_res.0.8)]
+
+saveRDS(seur, paste0(dp, label, ".seur_obj.rds"))
 
