@@ -62,7 +62,6 @@ for (i in 1:6){
                       project = lab_ids[i], 
                       method = methd, 
                       k_init = k, 
-                      model = "mltn", 
                       threads = 8) 
 
     sce <- diem_pipe2(sce, 

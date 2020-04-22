@@ -123,8 +123,9 @@ for (m in methds){
 # Compare the characteristics of droplets removed by DIEM to those not
 names_diff <- setdiff(rownames(seur_ED@meta.data), rownames(seur_diem@meta.data))
 diem_u <- setdiff(rownames(seur_diem@meta.data), rownames(seur_ED@meta.data))
-df_kept <- data.frame(seur_ED@meta.data[colnames(seur_diem),], Filter="DIEM &\nEmptyDrops")
-df_rm <- data.frame(seur_ED@meta.data[names_diff,], Filter="EmptyDrops\nOnly")
+shared <- intersect(rownames(seur_diem@meta.data), rownames(seur_ED@meta.data))
+df_kept <- data.frame(seur_diem@meta.data[shared,], Filter="DIEM &\nEmptyDrops")
+df_rm <- data.frame(seur_ED@meta.data[names_diff,], Filter="EmptyDrops\nonly")
 df_diem <- data.frame(seur_diem@meta.data[diem_u,colnames(seur_ED@meta.data)], Filter = "DIEM\nonly")
 
 datf_kept_rm <- do.call(rbind, list(df_kept, df_diem, df_rm))
@@ -138,7 +139,7 @@ relabel <- c("percent.mt"="Mitochondria", "MALAT1"="MALAT1")
 prmall <- ggplot(datfm, aes(x=Filter, y=value)) + 
 geom_boxplot(outlier.shape = NA) + theme_bw() +
 facet_wrap(~variable, labeller = labeller(variable=relabel)) + 
-geom_text(data = datn, aes(x=Method, y=y, label=N, angle = 90), size=4, hjust = 1, vjust = 0.5) + 
+# geom_text(data = datn, aes(x=Method, y=y, label=N, angle = 90), size=4, hjust = 1, vjust = 0.5) + 
 ylab("Percent") + 
 ggtitle("Fresh 68K PBMCs") + 
 scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits=c(0,.6)) +

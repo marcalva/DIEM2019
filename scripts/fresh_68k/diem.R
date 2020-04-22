@@ -36,8 +36,6 @@ sce <- diem_pipe1(counts,
                   dir_label = label, 
                   project = label, 
                   k_init = 20, 
-                  max_iter_dm = 300, 
-                  model = "mltn", 
                   threads = 12) 
 
 sce <- diem_pipe2(sce, 

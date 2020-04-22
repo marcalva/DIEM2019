@@ -52,14 +52,12 @@ sce <- diem_pipe1(counts,
                   project = label, 
                   method = method, 
                   k_init = k_init, 
-                  model = "mltn", 
                   threads = 16) 
 
 sce <- diem_pipe2(sce, 
                   dir_label = label, 
                   project = label, 
-                  method = method, 
-                  thresh = 0.5)
+                  method = method)
 
 # Add percent of reads spliced
 message("Adding percent spliced")

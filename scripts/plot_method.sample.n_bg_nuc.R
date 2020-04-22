@@ -141,9 +141,9 @@ at_ndebris <- sapply(at_labs, function(s){
                      qcl <- datf$Method == "Quantile"
                      ecl <- datf$Method == "EmptyDrops"
                      dcl <- datf$Method == "DIEM"
-                     mq <- sum(datf[qcl,"Truth"] == "Background")
-                     me <- sum(datf[ecl,"Truth"] == "Background")
-                     md <- sum(datf[dcl,"Truth"] == "Background")
+                     mq <- sum(datf[qcl,"Truth"] == "Background") / sum(qcl)
+                     me <- sum(datf[ecl,"Truth"] == "Background") / sum(ecl)
+                     md <- sum(datf[dcl,"Truth"] == "Background") / sum(dcl)
                      return(c("EmptyDrops" = me, "DIEM" = md, "Quantile" = mq))
 })
 at_ndebris <- t(at_ndebris)
@@ -173,9 +173,9 @@ at_ndebris <- sapply(at_labs, function(s){
                      qcl <- datf$Method == "Quantile"
                      ecl <- datf$Method == "EmptyDrops"
                      dcl <- datf$Method == "DIEM"
-                     mq <- sum(datf[qcl,"Truth"] == "Nuclear")
-                     me <- sum(datf[ecl,"Truth"] == "Nuclear")
-                     md <- sum(datf[dcl,"Truth"] == "Nuclear")
+                     mq <- sum(datf[qcl,"Truth"] == "Nuclear") / sum(qcl)
+                     me <- sum(datf[ecl,"Truth"] == "Nuclear") / sum(ecl)
+                     md <- sum(datf[dcl,"Truth"] == "Nuclear") / sum(dcl)
                      return(c("EmptyDrops" = me, "DIEM" = md, "Quantile" = mq))
 })
 at_ndebris <- t(at_ndebris)

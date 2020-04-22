@@ -3,6 +3,9 @@ diem_pipe1 <- function(counts,
                        dir_label, 
                        project, 
                        method="diem", 
+                       k_init = 20, 
+                       threads = 1,
+                       model = "mltn", 
                        ...){
     require(diem)
 
@@ -14,7 +17,18 @@ diem_pipe1 <- function(counts,
     dir.create(dir_plot, recursive=TRUE, showWarnings=FALSE)
 
     sce <- create_SCE(counts, name=project)
-    sce <- diem(sce, ...)
+    
+    mt_genes <- grep(pattern="^mt-", x=rownames(sce@gene_data), ignore.case=TRUE, value=TRUE)
+    sce <- get_gene_pct(x = sce, genes=mt_genes, name="pct.mt")
+    malat <- grep(pattern="^malat1$", x=rownames(sce@gene_data), ignore.case=TRUE, value=TRUE)
+    sce <- get_gene_pct(x = sce, genes=malat, name="MALAT1")
+
+    sce <- set_debris_test_set(sce)
+    sce <- filter_genes(sce)
+    sce <- get_pcs(sce)
+    sce <- init(sce, k_init = k_init, model = model)
+    sce <- run_em(sce, threads = threads, model = model)
+
     saveRDS(sce, paste0(dp, project, ".diem_sce.rds"))
     return(sce)
 }
